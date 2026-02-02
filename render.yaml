@@ -1,0 +1,21 @@
+# Render service + database configuration (replace placeholders before use)
+# See https://render.com/docs/render-yaml for details
+
+services:
+  - type: web
+    name: valentine-server
+    env: node
+    repo: "https://github.com/<OWNER>/<REPO>"
+    branch: master
+    root: server
+    buildCommand: npm ci
+    startCommand: npm start
+    plan: free
+
+databases:
+  - name: valentine-db
+    engine: postgresql
+    plan: starter
+
+# NOTE: Replace <OWNER> and <REPO> with your repository owner and name,
+# then import this file in Render (Dashboard → Blueprints → Import YAML).

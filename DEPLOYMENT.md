@@ -1,20 +1,36 @@
 # Déploiement (Front & Back)
 
-## Frontend — déployé automatiquement sur GitHub Pages
-- Workflow: `.github/workflows/deploy-client-pages.yml` déclenche sur `push` vers `main` et build le dossier `client`, puis publie `client/dist` sur GitHub Pages.
-- Important: le build utilise `VITE_BASE` défini par le workflow (`/${{ github.event.repository.name }}/`) pour que Vite génère des chemins corrects.
+## Frontend — déployé automatiquement sur GitHub Pages ou Vercel
+- Workflow: `.github/workflows/deploy-client-pages.yml` build et publie `client/dist` sur **GitHub Pages** (déclenche sur `main`/`master`).
+- Option recommandée: **Vercel** — connecte ton repo, définis le root sur `/client` (ou utilise `vercel.json` fourni).  
+  - Build command: `npm run build`
+  - Output dir: `dist`
+  - Définis la variable d'environnement `VITE_API_URL` sur l'URL publique de ton backend (ex: `https://api.example.com`).
 
-URL de publication (provisoire): `https://<username>.github.io/<repo>/` (remplacer `<username>` et `<repo>` par les tiens).
+URL de publication (exemple Vercel): `https://your-app.vercel.app`.
 
-## Backend — image Docker buildée & poussée sur GHCR
-- Workflow: `.github/workflows/build-and-push-server.yml` build et push l'image Docker du dossier `server` vers GitHub Container Registry (GHCR):
-  - Tags: `ghcr.io/<owner>/valentine-server:latest` et `ghcr.io/<owner>/valentine-server:<sha>`
-- Tu peux déployer cette image sur Render / Railway / Fly.io / un VPS.
+## Backend — Render (recommended)
+- `render.yaml` fourni pour import (remplace `<OWNER>/<REPO>` par tes valeurs) ou crée un service dans Render Dashboard et connecte le repo.
+- Si tu veux utiliser Render UI (simpler):
+  1. Crée un **Web Service** → repo: `exuprys-dev/Valentine-appV2` → root: `server` → branch: `master`.
+  2. Build Command: `npm ci`  
+     Start Command: `npm start`
+  3. Ajoute une **Postgres Database** (Render → Databases) si nécessaire.
+  4. Dans Environment, définis: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, et `ALLOWED_ORIGIN` (ex: `https://your-app.vercel.app`).
 
-## Ce qu'il te reste à faire
-1. (Serveur) Si tu veux un déploiement managé, crée un service sur Render/Railway et connecte-le soit au repo (build automatique), soit à l'image GHCR.
-2. (Serveur) Ajoute les variables d'environnement dans la plateforme choisie (ex: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`).
-3. (Serveur) Si tu utilises Postgres, crée la base via le provider (Render/Railway) et exécute `server/schema.sql` pour créer les tables.
+- Workflow: `.github/workflows/deploy-to-render.yml` peut déclencher un déploiement Render via API quand on pousse dans `server/**`. Tu dois ajouter ces **GitHub Secrets**:
+  - `RENDER_API_KEY` (Render dashboard → Account → API Keys)
+  - `RENDER_SERVICE_ID` (ID du service Render — visible sur la page du service)
 
-## Notes de sécurité
-- Ne commite jamais les secrets dans le repo. Utilise les Secrets GitHub (Settings → Secrets) ou les variables d'environnement fournies par ton host.
+## CORS & sécurité
+- Le serveur lit `ALLOWED_ORIGIN`. En production, définis `ALLOWED_ORIGIN` à l'URL Vercel (par exemple `https://your-app.vercel.app`) plutôt que `*`.
+- Ne commite jamais les secrets (utilise GitHub Secrets ou les variables d'environnement du host).
+
+## Initialiser la DB
+- Si tu utilises Postgres, connecte-toi à la DB (via psql ou l'UI du provider) et exécute `server/schema.sql`.
+
+---
+Si tu veux, je peux :
+- connecter le repo à **Vercel** et configurer `VITE_API_URL` (il faudra autoriser l'accès via ton compte Vercel), ou
+- créer les secrets GitHub requis **(RENDER_API_KEY, RENDER_SERVICE_ID)** si tu me fournis les valeurs, ou
+- te guider pas à pas pendant la connexion Render/Vercel.

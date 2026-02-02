@@ -4,7 +4,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// Allow a specific origin in production. Set ALLOWED_ORIGIN to your Vercel URL (e.g. https://your-app.vercel.app)
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGIN || '*',
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {

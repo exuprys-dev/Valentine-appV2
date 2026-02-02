@@ -2,7 +2,7 @@ name: Build and push server Docker image
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
     paths:
       - 'server/**'
 

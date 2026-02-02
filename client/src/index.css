@@ -1,0 +1,26 @@
+body {
+    background-color: #f8f9fa;
+    /* Light background for clean look, or keep dark if desired. Let's go with a nice Valentine gradient or clean look. */
+    background: linear-gradient(135deg, #fff0f3 0%, #fff 100%);
+    min-height: 100vh;
+}
+
+/* Custom Valentine touches */
+.btn-primary {
+    background-color: #ff3366;
+    border-color: #ff3366;
+}
+
+.btn-primary:hover {
+    background-color: #e62e5c;
+    border-color: #e62e5c;
+}
+
+.text-valentine {
+    color: #ff3366;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}

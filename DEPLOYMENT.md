@@ -9,18 +9,41 @@
 
 URL de publication (exemple Vercel): `https://your-app.vercel.app`.
 
-## Backend — Render (recommended)
-- `render.yaml` fourni pour import (remplace `<OWNER>/<REPO>` par tes valeurs) ou crée un service dans Render Dashboard et connecte le repo.
-- Si tu veux utiliser Render UI (simpler):
+## Backend — Render (recommended) or Railway (recommended for MySQL)
+
+### Render (optional)
+- `render.yaml` provided for import (remplace `<OWNER>/<REPO>` par tes valeurs) ou crée un service dans Render Dashboard et connecte le repo.
+- If using Render UI:
   1. Crée un **Web Service** → repo: `exuprys-dev/Valentine-appV2` → root: `server` → branch: `master`.
   2. Build Command: `npm ci`  
      Start Command: `npm start`
-  3. Ajoute une **Postgres Database** (Render → Databases) si nécessaire.
-  4. Dans Environment, définis: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, et `ALLOWED_ORIGIN` (ex: `https://your-app.vercel.app`).
+  3. Add a **Postgres Database** (Render → Databases) if necessary.
+  4. In Environment, set: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, and `ALLOWED_ORIGIN` (ex: `https://your-app.vercel.app`).
 
-- Workflow: `.github/workflows/deploy-to-render.yml` peut déclencher un déploiement Render via API quand on pousse dans `server/**`. Tu dois ajouter ces **GitHub Secrets**:
+- Workflow: `.github/workflows/deploy-to-render.yml` can trigger a Render deploy via API on pushes under `server/**`. Add these **GitHub Secrets**:
   - `RENDER_API_KEY` (Render dashboard → Account → API Keys)
-  - `RENDER_SERVICE_ID` (ID du service Render — visible sur la page du service)
+  - `RENDER_SERVICE_ID` (ID du service Render — visible on the service page)
+
+### Railway (recommended if you want a simple MySQL setup)
+- Railway supports MySQL as a plugin and integrates directly with GitHub for automatic deploys.
+- Quick steps:
+  1. Create an account on https://railway.app and connect your GitHub account.
+  2. Create a new **Project** → Connect your repository `exuprys-dev/Valentine-appV2` and select the `server` folder as the service root.
+  3. In the project, add a **MySQL plugin** (Railway → Plugins → Add MySQL). This will create environment variables for you.
+  4. In **Environment** variables (Railway), check the provided vars (you'll get a `MYSQLHOST`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE` or a single `DATABASE_URL`).
+     - Our server now supports `DATABASE_URL` (format: `mysql://user:pass@host:port/db`) or the individual `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` vars.
+  5. Add these env vars if not provisioned automatically: `JWT_SECRET`, `ALLOWED_ORIGIN` (set to your Vercel URL), and `NODE_ENV=production`.
+  6. Trigger deploy (Railway will auto-deploy on push if connected to GitHub).
+
+**Initialize the MySQL schema**:
+- In Railway, open the DB plugin → click **Connect** to get a connection string, then run the SQL from `server/schema.sql` using the SQL editor they provide, or locally with:
+  ```bash
+  mysql -h <host> -u <user> -p<password> <db_name> < server/schema.sql
+  ```
+
+**Notes**:
+- Make sure `ALLOWED_ORIGIN` equals your Vercel URL (e.g. `https://your-app.vercel.app`) to avoid CORS issues.
+- If Railway provides `DATABASE_URL`, set it in Railway's environment variables and the app will use it automatically.
 
 ## CORS & sécurité
 - Le serveur lit `ALLOWED_ORIGIN`. En production, définis `ALLOWED_ORIGIN` à l'URL Vercel (par exemple `https://your-app.vercel.app`) plutôt que `*`.

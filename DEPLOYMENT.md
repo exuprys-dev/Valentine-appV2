@@ -1,64 +1,74 @@
-# Déploiement (Front & Back)
+# Guide de Déploiement : Vercel + AlwaysData
 
-## Frontend — déployé sur Netlify (recommandé) ou GitHub Pages
-- Workflow: `.github/workflows/deploy-client-netlify.yml` build et déploie `client/dist` sur **Netlify** (déclenche sur `main`/`master`).
-- Option rapide (UI): connecte ton compte GitHub sur https://app.netlify.com → New site from Git → choisis `exuprys-dev/Valentine-appV2` → dans Build settings :
-  - **Base directory**: `client`  
-  - **Build command**: `npm run build`  
-  - **Publish directory**: `dist`
-- Variables d'environnement (Netlify) :
-  - `VITE_API_URL` = `https://<your-backend-url>`
-  - (optionnel) autres variables front
+## 1. Frontend — Vercel
 
-URL de publication (exemple Netlify): `https://your-app.netlify.app`.
+Vercel est idéal pour déployer ton application React/Vite.
 
-**Si tu automates via GitHub Actions** : ajoute ces GitHub Secrets `NETLIFY_AUTH_TOKEN` et `NETLIFY_SITE_ID` (Netlify → User Settings → Applications → Personal access tokens, et Site settings → Site information).
+1.  **Préparation** : Assure-toi que ton code est poussé sur GitHub.
+2.  **Création du projet** :
+    *   Va sur [vercel.com](https://vercel.com) et connecte ton compte GitHub.
+    *   Clique sur **Add New...** > **Project** > Importe ton dépôt `Valentine-appV2`.
+3.  **Configuration du projet sur Vercel** :
+    *   **Framework Preset** : Sélectionne `Vite`.
+    *   **Root Directory** : Clique sur `Edit` et sélectionne le dossier `client`.
+    *   Les commandes de build (`npm run build`) et dossier (`dist`) devraient se remplir automatiquement.
+4.  **Variables d'Environnement** :
+    *   Dans la section "Environment Variables", ajoute une variable :
+        *   Nom : `VITE_API_URL`
+        *   Valeur : L'URL de ton backend AlwaysData (ex: `https://mon-app-valentine.alwaysdata.net`).
+        *   *Note : Tu devras peut-être revenir remplir cette valeur une fois le backend déployé. Pour le moment, tu peux mettre un placeholder ou laisser vide si ton code gère le cas.*
+5.  **Déployer** : Clique sur **Deploy**.
 
-## Backend — Render (recommended) or Railway (recommended for MySQL)
+## 2. Backend — AlwaysData
 
-### Render (optional)
-- `render.yaml` provided for import (remplace `<OWNER>/<REPO>` par tes valeurs) ou crée un service dans Render Dashboard et connecte le repo.
-- If using Render UI:
-  1. Crée un **Web Service** → repo: `exuprys-dev/Valentine-appV2` → root: `server` → branch: `master`.
-  2. Build Command: `npm ci`  
-     Start Command: `npm start`
-  3. Add a **Postgres Database** (Render → Databases) if necessary.
-  4. In Environment, set: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, and `ALLOWED_ORIGIN` (ex: `https://your-app.vercel.app`).
+AlwaysData est un hébergeur français qui supporte Node.js et MySQL même en compte gratuit (100Mo).
 
-- Workflow: `.github/workflows/deploy-to-render.yml` can trigger a Render deploy via API on pushes under `server/**`. Add these **GitHub Secrets**:
-  - `RENDER_API_KEY` (Render dashboard → Account → API Keys)
-  - `RENDER_SERVICE_ID` (ID du service Render — visible on the service page)
+### Étape A : Créer le compte et l'Environnement
+1.  Crée ton compte sur [alwaysdata.com](https://www.alwaysdata.com).
+2.  Dans l'interface d'administration (AlwaysData Administration), va dans la section **Web** > **Sites**.
 
-### Railway (recommended if you want a simple MySQL setup)
-- Railway supports MySQL as a plugin and integrates directly with GitHub for automatic deploys.
-- Quick steps:
-  1. Create an account on https://railway.app and connect your GitHub account.
-  2. Create a new **Project** → Connect your repository `exuprys-dev/Valentine-appV2` and select the `server` folder as the service root.
-  3. In the project, add a **MySQL plugin** (Railway → Plugins → Add MySQL). This will create environment variables for you.
-  4. In **Environment** variables (Railway), check the provided vars (you'll get a `MYSQLHOST`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE` or a single `DATABASE_URL`).
-     - Our server now supports `DATABASE_URL` (format: `mysql://user:pass@host:port/db`) or the individual `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` vars.
-  5. Add these env vars if not provisioned automatically: `JWT_SECRET`, `ALLOWED_ORIGIN` (set to your Vercel URL), and `NODE_ENV=production`.
-  6. Trigger deploy (Railway will auto-deploy on push if connected to GitHub).
+### Étape B : Base de Données (MySQL)
+1.  Va dans **Bases de données** > **MySQL**.
+2.  Ajoute une nouvelle base de données :
+    *   Nom de la base (ex: `valentine_db`).
+    *   Crée un utilisateur et un mot de passe (note-les bien !).
+    *   Donne les droits à cet utilisateur sur la base.
+    *   Note le **Hôte** (souvent `mysql-toncompte.alwaysdata.net`).
+3.  **Initialiser la base** :
+    *   Tu peux utiliser **phpMyAdmin** (lien dans l'interface AlwaysData) pour importer ton fichier `server/schema.sql` ou exécuter les requêtes SQL manuellement pour créer les tables.
 
-**Initialize the MySQL schema**:
-- In Railway, open the DB plugin → click **Connect** to get a connection string, then run the SQL from `server/schema.sql` using the SQL editor they provide, or locally with:
-  ```bash
-  mysql -h <host> -u <user> -p<password> <db_name> < server/schema.sql
-  ```
+### Étape C : Configurer l'Application Node.js
+1.  Retourne dans **Web** > **Sites**.
+2.  Crée un nouveau site ou modifie le site par défaut :
+    *   **Type** : `Node.js`.
+    *   **Adresse** : Choisis ton sous-domaine (ex: `mon-app-valentine.alwaysdata.net`).
+    *   **Répertoire de travail** : `/www/valentine-server` (par exemple).
+    *   **Script de démarrage** : `server/index.js` (ou juste `index.js` si tu mets tout à la racine du dossier).
+    *   **Version Node.js** : Une version récente (ex: 20.x ou 18.x).
 
-**Notes**:
-- Make sure `ALLOWED_ORIGIN` equals your Vercel URL (e.g. `https://your-app.vercel.app`) to avoid CORS issues.
-- If Railway provides `DATABASE_URL`, set it in Railway's environment variables and the app will use it automatically.
+### Étape D : Mettre les fichiers sur le serveur
+Tu as plusieurs options pour envoyer ton code backend (dossier `server`) chez AlwaysData :
+*   **Option 1 : Git (Recommandé)**
+    *   Connecte-toi en SSH à ton compte AlwaysData (`ssh tonuser@ssh-tonuser.alwaysdata.net`).
+    *   Clone ton repo dans le dossier `/www/` (ou un sous-dossier).
+    *   `git clone https://github.com/exuprys-dev/Valentine-appV2.git valentine-server`
+    *   Va dans le dossier server : `cd valentine-server/server`.
+    *   Installe les dépendances : `npm install --production`.
+*   **Option 2 : FTP**
+    *   Utilise FileZilla avec les accès FTP fournis par AlwaysData.
+    *   Copie le contenu de ton dossier `server` local vers un dossier sur le serveur (ex: `/www/valentine-server`).
+    *   Tu devras quand même lancer `npm install` (via SSH ou l'interface si dispo).
 
-## CORS & sécurité
-- Le serveur lit `ALLOWED_ORIGIN`. En production, définis `ALLOWED_ORIGIN` à l'URL Vercel (par exemple `https://your-app.vercel.app`) plutôt que `*`.
-- Ne commite jamais les secrets (utilise GitHub Secrets ou les variables d'environnement du host).
+### Étape E : Variables d'Environnement
+Dans la configuration de ton **Site** sur AlwaysData (onglet **Variables d'environnement**), ajoute :
+*   `DB_HOST` = (L'hôte MySQL noté à l'étape B)
+*   `DB_USER` = (Ton user MySQL)
+*   `DB_PASSWORD` = (Ton mdp MySQL)
+*   `DB_NAME` = (Le nom de ta base)
+*   `JWT_SECRET` = (Une phrase secrète complexe)
+*   `ALLOWED_ORIGIN` = (L'URL de ton frontend Vercel, ex: `https://valentine-client.vercel.app`. **Important pour éviter les erreurs CORS**).
 
-## Initialiser la DB
-- Si tu utilises Postgres, connecte-toi à la DB (via psql ou l'UI du provider) et exécute `server/schema.sql`.
-
----
-Si tu veux, je peux :
-- connecter le repo à **Vercel** et configurer `VITE_API_URL` (il faudra autoriser l'accès via ton compte Vercel), ou
-- créer les secrets GitHub requis **(RENDER_API_KEY, RENDER_SERVICE_ID)** si tu me fournis les valeurs, ou
-- te guider pas à pas pendant la connexion Render/Vercel.
+### Étape F : Vérification
+1.  Redémarre le site dans l'interface AlwaysData si nécessaire.
+2.  Vérifie les logs (dans `/admin/logs/sites/`) si ça ne marche pas.
+3.  Une fois le backend OK (l'URL `https://ton-app.alwaysdata.net` répond "Welcome" ou similaire), retourne sur **Vercel** et mets à jour la variable `VITE_API_URL` avec cette URL, puis redéploie le frontend.

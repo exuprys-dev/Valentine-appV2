@@ -1,13 +1,18 @@
 # Déploiement (Front & Back)
 
-## Frontend — déployé automatiquement sur GitHub Pages ou Vercel
-- Workflow: `.github/workflows/deploy-client-pages.yml` build et publie `client/dist` sur **GitHub Pages** (déclenche sur `main`/`master`).
-- Option recommandée: **Vercel** — connecte ton repo, définis le root sur `/client` (ou utilise `vercel.json` fourni).  
-  - Build command: `npm run build`
-  - Output dir: `dist`
-  - Définis la variable d'environnement `VITE_API_URL` sur l'URL publique de ton backend (ex: `https://api.example.com`).
+## Frontend — déployé sur Netlify (recommandé) ou GitHub Pages
+- Workflow: `.github/workflows/deploy-client-netlify.yml` build et déploie `client/dist` sur **Netlify** (déclenche sur `main`/`master`).
+- Option rapide (UI): connecte ton compte GitHub sur https://app.netlify.com → New site from Git → choisis `exuprys-dev/Valentine-appV2` → dans Build settings :
+  - **Base directory**: `client`  
+  - **Build command**: `npm run build`  
+  - **Publish directory**: `dist`
+- Variables d'environnement (Netlify) :
+  - `VITE_API_URL` = `https://<your-backend-url>`
+  - (optionnel) autres variables front
 
-URL de publication (exemple Vercel): `https://your-app.vercel.app`.
+URL de publication (exemple Netlify): `https://your-app.netlify.app`.
+
+**Si tu automates via GitHub Actions** : ajoute ces GitHub Secrets `NETLIFY_AUTH_TOKEN` et `NETLIFY_SITE_ID` (Netlify → User Settings → Applications → Personal access tokens, et Site settings → Site information).
 
 ## Backend — Render (recommended) or Railway (recommended for MySQL)
 

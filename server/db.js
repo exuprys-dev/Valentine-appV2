@@ -16,9 +16,29 @@ if (isPostgres) {
 
   // Wrap pg pool to match mysql2 interface
   const originalQuery = pool.query.bind(pool);
-  pool.query = async (...args) => {
-    const result = await originalQuery(...args);
-    return [result.rows, result.fields];
+  pool.query = async (sql, params) => {
+    if (typeof sql === 'string' && params) {
+      let index = 1;
+      sql = sql.replace(/\?/g, () => `$${index++}`);
+
+      // For INSERT queries, append RETURNING id to get the insertId
+      if (sql.trim().toLowerCase().startsWith('insert')) {
+        sql += ' RETURNING id';
+      }
+    }
+    const result = await originalQuery(sql, params);
+
+    // Mock the result structure for mysql2
+    const rows = result.rows;
+    const fields = result.fields;
+
+    // If it was an INSERT, the first row will contain the ID
+    const mockResult = rows;
+    if (result.command === 'INSERT' && rows.length > 0) {
+      mockResult.insertId = rows[0].id;
+    }
+
+    return [mockResult, fields];
   };
 
   // Also add execute() method (alias to query for PostgreSQL)

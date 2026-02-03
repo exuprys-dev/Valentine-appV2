@@ -25,12 +25,16 @@ async function createAdmin() {
         console.log("Admin user ready.");
         console.log("Name: Admin");
         console.log("Password: admin");
-
-        process.exit(0);
     } catch (e) {
-        console.error("Error:", e);
-        process.exit(1);
+        console.error("Error creating admin:", e);
+        throw e;
     }
 }
 
-createAdmin();
+if (require.main === module) {
+    createAdmin()
+        .then(() => process.exit(0))
+        .catch(() => process.exit(1));
+}
+
+module.exports = createAdmin;

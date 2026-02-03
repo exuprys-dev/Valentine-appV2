@@ -1,12 +1,20 @@
 // Script to initialize database tables automatically
 const pool = require('./db');
+const createAdmin = require('./create-admin');
 
 async function initDatabase() {
-    try {
-        console.log('🔄 Initializing database...');
+  try {
+    console.log('🔄 Checking database status...');
 
-        // Create users table
-        await pool.query(`
+    // RESET logic if environment variable is set
+    if (process.env.DB_RESET === 'true') {
+      console.log('🗑️ DB_RESET is true. Clearing all tables...');
+      await pool.query('TRUNCATE TABLE users, matches RESTART IDENTITY CASCADE');
+      console.log('✅ Tables cleared.');
+    }
+
+    // Create users table
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -18,22 +26,28 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-        console.log('✅ Users table ready');
+    console.log('✅ Users table ready');
 
-        // Create matches table
-        await pool.query(`
+    // Create matches table
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS matches (
         id SERIAL PRIMARY KEY,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-        console.log('✅ Matches table ready');
+    console.log('✅ Matches table ready');
 
-        console.log('✅ Database initialization complete!');
-    } catch (error) {
-        console.error('❌ Database initialization error:', error.message);
-        throw error;
+    // If we just reset, create the admin
+    if (process.env.DB_RESET === 'true') {
+      await createAdmin();
+      console.log('✅ Initial admin account recreated.');
     }
+
+    console.log('✅ Database initialization complete!');
+  } catch (error) {
+    console.error('❌ Database initialization error:', error.message);
+    throw error;
+  }
 }
 
 module.exports = initDatabase;

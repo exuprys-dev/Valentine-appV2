@@ -16,7 +16,7 @@ export default function Admin() {
         setStatus('Running algorithm...');
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
             const res = await fetch(`${API_URL}/api/admin/match`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }

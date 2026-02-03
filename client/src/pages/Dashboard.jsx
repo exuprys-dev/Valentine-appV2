@@ -11,7 +11,8 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/user/dashboard', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        fetch(`${API_URL}/api/user/dashboard`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => res.json())

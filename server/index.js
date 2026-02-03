@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const initDatabase = require('./init-db');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -12,7 +14,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('Valentine API is running');
+  res.send('Valentine API is running');
 });
 
 const authRoutes = require('./routes/auth');
@@ -24,6 +26,14 @@ app.use('/api/admin', adminRoutes);
 const userRoutes = require('./routes/user');
 app.use('/api/user', userRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Initialize database and start server
+initDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('❌ Failed to initialize database:', error);
+    process.exit(1);
+  });

@@ -13,11 +13,11 @@ async function createAdmin() {
 
         if (rows.length > 0) {
             console.log("User 'Admin' already exists. Updating to admin...");
-            await pool.query("UPDATE users SET is_admin = 1 WHERE name = ?", [name]);
+            await pool.query("UPDATE users SET is_admin = TRUE WHERE name = ?", [name]);
         } else {
             console.log("Creating new user 'Admin'...");
             await pool.query(
-                "INSERT INTO users (name, firstname, password, hobbies, is_admin) VALUES (?, ?, ?, ?, 1)",
+                "INSERT INTO users (name, firstname, password, hobbies, is_admin) VALUES (?, ?, ?, ?, TRUE)",
                 [name, firstname, hashedPassword, "[]"]
             );
         }

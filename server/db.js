@@ -20,6 +20,9 @@ if (isPostgres) {
     const result = await originalQuery(...args);
     return [result.rows, result.fields];
   };
+
+  // Also add execute() method (alias to query for PostgreSQL)
+  pool.execute = pool.query;
 } else {
   // MySQL configuration (for local dev, AlwaysData, etc.)
   const mysql = require('mysql2/promise');

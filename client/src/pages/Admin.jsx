@@ -13,7 +13,7 @@ export default function Admin() {
         if (!confirm("Are you sure you want to generate matches? This might overwrite existing matches.")) return;
 
         setLoading(true);
-        setStatus('Running algorithm...');
+        setStatus('Algorithme en cours...');
 
         try {
             const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
@@ -36,13 +36,13 @@ export default function Admin() {
     return (
         <div className="min-vh-100 bg-light d-flex flex-col flex-md-row align-items-center justify-center p-4 relative">
             <div className="position-absolute top-0 start-0 m-3">
-                <Button variant="ghost" className="text-decoration-none" onClick={() => navigate('/dashboard')}>&larr; Back to Dashboard</Button>
+                <Button variant="ghost" className="text-decoration-none" onClick={() => navigate('/dashboard')}>&larr; Retour</Button>
             </div>
 
             <div className="card shadow-lg border-0 rounded-4 w-100" style={{ maxWidth: '500px' }}>
                 <div className="card-body p-5 text-center">
-                    <h1 className="fw-bold mb-2 text-valentine">Admin Panel</h1>
-                    <p className="text-muted mb-4">Cupid's Control Center</p>
+                    <h1 className="fw-bold mb-2 text-valentine">Panneau d'administration</h1>
+                    <p className="text-muted mb-4">Centre de contrôle de Cupidon</p>
 
                     <div className="d-grid gap-3">
                         <Button
@@ -55,7 +55,7 @@ export default function Admin() {
                                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                     Matching...
                                 </>
-                            ) : '💘 Launch Compatibility Test'}
+                            ) : '💘 Lancer le test de compatibilité'}
                         </Button>
 
                         {status && (

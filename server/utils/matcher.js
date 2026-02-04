@@ -12,4 +12,9 @@ function calculateSimilarity(hobbies1, hobbies2) {
     return union === 0 ? 0 : intersection / union;
 }
 
-module.exports = { calculateSimilarity };
+function calculateSexSimilarity(sex1, sex2) {
+    if (sex1 === sex2) return 1;
+    return 0;
+}
+
+module.exports = { calculateSimilarity, calculateSexSimilarity };

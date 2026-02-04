@@ -38,8 +38,8 @@ export default function Dashboard() {
                 <div className="container">
                     <span className="navbar-brand text-valentine fw-bold">Valentine App</span>
                     <div className="d-flex gap-2">
-                        <Button variant="ghost" onClick={() => navigate('/admin')}>Admin</Button>
-                        <Button variant="secondary" className="btn-outline-secondary" onClick={handleLogout}>Logout</Button>
+                        <Button variant="ghost" onClick={() => navigate('/admin')}>Administration</Button>
+                        <Button variant="ghost" onClick={handleLogout}>Se déconnecter</Button>
                     </div>
                 </div>
             </nav>
@@ -47,7 +47,7 @@ export default function Dashboard() {
             {loading ? (
                 <div className="text-center mt-5">
                     <div className="spinner-border text-valentine" role="status">
-                        <span className="visually-hidden">Loading...</span>
+                        <span className="visually-hidden">Chargement...</span>
                     </div>
                 </div>
             ) : (
@@ -58,13 +58,14 @@ export default function Dashboard() {
                         className="card shadow-sm border-0 mb-5 rounded-4"
                     >
                         <div className="card-body p-4 p-md-5">
-                            <h2 className="card-title fw-bold mb-3">Hello, {matchData?.user.firstname} {matchData?.user.name}!</h2>
+                            <h2 className="card-title fw-bold mb-3">Bonjour, {matchData?.user.firstname} {matchData?.user.name} !</h2>
                             <div className="d-flex flex-wrap gap-2">
                                 {matchData?.user.hobbies.map((hobby, i) => (
                                     <span key={i} className="badge bg-secondary rounded-pill fw-normal fs-6">
                                         {hobby}
                                     </span>
                                 ))}
+                                <span className="badge bg-secondary rounded-pill fw-normal fs-6">{matchData?.user.sex}</span>
                             </div>
                         </div>
                     </motion.div>
@@ -78,7 +79,7 @@ export default function Dashboard() {
                             style={{ background: 'linear-gradient(45deg, #ff3366, #ff6b6b)' }}
                         >
                             <div className="card-body p-5 text-center text-white">
-                                <h3 className="mb-4">💖 You have been matched with:</h3>
+                                <h3 className="mb-4">💖 Vous avez été matché avec :</h3>
                                 <div className="row justify-content-center g-4">
                                     {matchData.matches.map(partner => (
                                         <div key={partner.id} className="col-md-auto">
@@ -89,6 +90,7 @@ export default function Dashboard() {
                                                     {partner.hobbies.map((h, i) => (
                                                         <span key={i} className="badge bg-light text-dark border">{h}</span>
                                                     ))}
+                                                    <span className="badge bg-secondary rounded-pill fw-normal fs-6">{partner.sex}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -103,8 +105,9 @@ export default function Dashboard() {
                             className="text-center mt-5 opacity-75"
                         >
                             <div className="display-1 mb-3">⏳</div>
-                            <h3 className="h2">Waiting for Cupid to strike...</h3>
-                            <p className="text-muted">The admin hasn't run the matching yet.</p>
+                            <h3 className="h2">En attente du coup de foudre...</h3>
+                            <p className="text-muted">L'administrateur n'a pas encore lancé le processus.</p>
+                            <p className="text-muted">Ou vous n'avez juste pas de partenaire</p>
                         </motion.div>
                     )}
                 </div>

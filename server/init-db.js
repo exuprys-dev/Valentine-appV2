@@ -8,9 +8,17 @@ async function initDatabase() {
 
     // RESET logic if environment variable is set
     if (process.env.DB_RESET === 'true') {
-      console.log('🗑️ DB_RESET is true. Clearing all tables...');
-      await pool.query('TRUNCATE TABLE users, matches RESTART IDENTITY CASCADE');
-      console.log('✅ Tables cleared.');
+      console.log('🗑️ DB_RESET is true. Dropping tables for a clean reset...');
+      try {
+        await pool.query('DROP TABLE IF EXISTS matches CASCADE');
+        await pool.query('DROP TABLE IF EXISTS users CASCADE');
+        console.log('✅ Tables dropped.');
+      } catch (e) {
+        // Simple drop for MySQL
+        await pool.query('DROP TABLE IF EXISTS matches');
+        await pool.query('DROP TABLE IF EXISTS users');
+        console.log('✅ Tables dropped (MySQL).');
+      }
     }
 
     // Create users table
@@ -21,6 +29,7 @@ async function initDatabase() {
         firstname VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         hobbies TEXT,
+        sex VARCHAR(50),
         match_id INT DEFAULT NULL,
         is_admin BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

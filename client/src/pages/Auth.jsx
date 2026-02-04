@@ -14,7 +14,8 @@ export default function Auth() {
         name: '',
         firstname: '',
         password: '',
-        hobbies: ''
+        hobbies: '',
+        sex: ''
     });
     const [error, setError] = useState('');
 
@@ -33,7 +34,8 @@ export default function Auth() {
                 name: formData.name,
                 firstname: formData.firstname,
                 password: formData.password,
-                hobbies: formData.hobbies.split(',').map(h => h.trim()).filter(Boolean)
+                hobbies: formData.hobbies.split(',').map(h => h.trim()).filter(Boolean),
+                sex: formData.sex
             };
 
         try {
@@ -46,14 +48,14 @@ export default function Auth() {
 
             const data = await res.json();
 
-            if (!res.ok) throw new Error(data.error || 'Something went wrong');
+            if (!res.ok) throw new Error(data.error || 'Quelque chose s\'est mal passé');
 
             if (isLogin) {
                 login(data.user, data.token);
                 navigate('/dashboard');
             } else {
                 setIsLogin(true);
-                setError('Registration successful! Please log in.');
+                setError('Inscription réussie! Veuillez vous connecter.');
             }
         } catch (err) {
             setError(err.message);
@@ -75,12 +77,12 @@ export default function Auth() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="text-center mb-4 text-valentine fw-bold"
                             >
-                                {isLogin ? 'Welcome Back' : 'Join Valentine'}
+                                {isLogin ? 'Ravi de vous revoir' : 'Rejoignez la belle aventure'}
                             </motion.h2>
 
                             <form onSubmit={handleSubmit}>
                                 <Input
-                                    label="Last Name (Identifier)"
+                                    label="Nom"
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
@@ -97,7 +99,7 @@ export default function Auth() {
                                             className="overflow-hidden"
                                         >
                                             <Input
-                                                label="First Name"
+                                                label="Prénom"
                                                 name="firstname"
                                                 value={formData.firstname}
                                                 onChange={handleChange}
@@ -105,18 +107,32 @@ export default function Auth() {
                                                 required={!isLogin}
                                             />
                                             <Input
-                                                label="Hobbies (comma separated)"
+                                                label="Loisirs (séparés par des virgules)"
                                                 name="hobbies"
                                                 value={formData.hobbies}
                                                 onChange={handleChange}
-                                                placeholder="Reading, Cinema, Coding"
+                                                placeholder="Lecture, Cinéma, Codage"
                                             />
+                                            <div className="mb-3">
+                                                <label className="form-label text-secondary small fw-bold">Genre</label>
+                                                <select
+                                                    name="sex"
+                                                    value={formData.sex}
+                                                    onChange={handleChange}
+                                                    className="form-select border-0 bg-light rounded-3"
+                                                    required={!isLogin}
+                                                >
+                                                    <option value="">Choisir</option>
+                                                    <option value="Masculin">Masculin</option>
+                                                    <option value="Feminin">Feminin</option>
+                                                </select>
+                                            </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
 
                                 <Input
-                                    label="Password"
+                                    label="Mot de passe"
                                     type="password"
                                     name="password"
                                     value={formData.password}
@@ -128,18 +144,18 @@ export default function Auth() {
                                 {error && <div className="alert alert-danger text-center p-2 mb-3">{error}</div>}
 
                                 <Button type="submit" className="w-100 mt-2">
-                                    {isLogin ? 'Sign In' : 'Sign Up'}
+                                    {isLogin ? 'Se connecter' : 'S\'inscrire'}
                                 </Button>
                             </form>
 
                             <div className="mt-4 text-center">
                                 <p className="text-secondary mb-0">
-                                    {isLogin ? "Don't have an account?" : "Already have an account?"}
+                                    {isLogin ? "Vous n'avez pas de compte ?" : "Vous avez déjà un compte ?"}
                                     <button
                                         onClick={() => setIsLogin(!isLogin)}
                                         className="btn btn-link text-valentine fw-bold text-decoration-none p-0 ms-2"
                                     >
-                                        {isLogin ? 'Register' : 'Login'}
+                                        {isLogin ? 'S\'inscrire' : 'Se connecter'}
                                     </button>
                                 </p>
                             </div>

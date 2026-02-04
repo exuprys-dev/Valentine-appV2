@@ -7,27 +7,31 @@ const pool = require('../db');
 // Register
 router.post('/register', async (req, res) => {
     try {
-        const { name, firstname, password, hobbies } = req.body;
+        const { name, firstname, password, hobbies, sex } = req.body;
 
         // Basic validation
-        if (!name || !firstname || !password) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        if (!name || !firstname || !password || !sex) {
+            return res.status(400).json({ error: 'Veuillez remplir tous les champs' });
         }
 
-        // Check if user exists (optional, keeping it simple for now)
+        // Check if user exists 
+        const [rows] = await pool.execute('SELECT * FROM users WHERE name = ? AND firstname = ? AND sex = ?', [name, firstname, sex]);
+        if (rows.length > 0) {
+            return res.status(400).json({ error: 'Utilisateur déjà inscrit' });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const hobbiesJson = JSON.stringify(hobbies || []);
 
         const [result] = await pool.execute(
-            'INSERT INTO users (name, firstname, password, hobbies) VALUES (?, ?, ?, ?)',
-            [name, firstname, hashedPassword, hobbiesJson]
+            'INSERT INTO users (name, firstname, password, hobbies, sex) VALUES (?, ?, ?, ?, ?)',
+            [name, firstname, hashedPassword, hobbiesJson, sex]
         );
 
-        res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+        res.status(201).json({ message: 'Utilisateur enregistré avec succès', userId: result.insertId });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error during registration' });
+        res.status(500).json({ error: 'Erreur serveur lors de l\'inscription' });
     }
 });
 
@@ -41,20 +45,20 @@ router.post('/login', async (req, res) => {
         // The prompt didn't specify email. Let's use `name` as the identifier.
 
         if (!name || !password) {
-            return res.status(400).json({ error: 'Missing credentials' });
+            return res.status(400).json({ error: 'Veuillez remplir tous les champs' });
         }
 
         const [rows] = await pool.execute('SELECT * FROM users WHERE name = ?', [name]);
 
         if (rows.length === 0) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ error: 'Identifiants invalides' });
         }
 
         const user = rows[0];
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ error: 'Identifiants invalides' });
         }
 
         const token = jwt.sign(
@@ -70,12 +74,13 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 firstname: user.firstname,
                 isAdmin: !!user.is_admin,
-                hobbies: JSON.parse(user.hobbies || "[]")
+                hobbies: JSON.parse(user.hobbies || "[]"),
+                sex: user.sex
             }
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error during login' });
+        res.status(500).json({ error: 'Erreur serveur lors de la connexion' });
     }
 });
 

@@ -17,8 +17,8 @@ async function createAdmin() {
         } else {
             console.log("Creating new user 'Admin'...");
             await pool.query(
-                "INSERT INTO users (name, firstname, password, hobbies, is_admin) VALUES (?, ?, ?, ?, TRUE)",
-                [name, firstname, hashedPassword, "[]"]
+                "INSERT INTO users (name, firstname, password, hobbies, sex, is_admin) VALUES (?, ?, ?, ?, ?, TRUE)",
+                [name, firstname, hashedPassword, "[]", "Other"]
             );
         }
 

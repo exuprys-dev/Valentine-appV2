@@ -143,4 +143,49 @@ router.post('/match', async (req, res) => {
     }
 });
 
+// Get all matches and their users
+router.get('/matches', async (req, res) => {
+    try {
+        const [matches] = await pool.execute(`
+            SELECT 
+                m.id as match_id,
+                m.created_at,
+                u.id as user_id,
+                u.name,
+                u.firstname,
+                u.image_url,
+                u.sex,
+                u.hobbies
+            FROM matches m
+            JOIN users u ON u.match_id = m.id
+            ORDER BY m.id
+        `);
+
+        // Group by match_id
+        const groupedMatches = matches.reduce((acc, row) => {
+            if (!acc[row.match_id]) {
+                acc[row.match_id] = {
+                    id: row.match_id,
+                    created_at: row.created_at,
+                    users: []
+                };
+            }
+            acc[row.match_id].users.push({
+                id: row.user_id,
+                name: row.name,
+                firstname: row.firstname,
+                image_url: row.image_url,
+                sex: row.sex,
+                hobbies: JSON.parse(row.hobbies || "[]")
+            });
+            return acc;
+        }, {});
+
+        res.json(Object.values(groupedMatches));
+    } catch (error) {
+        console.error('❌ Erreur lors de la récupération des matchs:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
 module.exports = router;

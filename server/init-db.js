@@ -30,6 +30,7 @@ async function initDatabase() {
         password VARCHAR(255) NOT NULL,
         hobbies TEXT,
         sex VARCHAR(50),
+        image_url VARCHAR(255) DEFAULT NULL,
         match_id INT DEFAULT NULL,
         is_admin BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

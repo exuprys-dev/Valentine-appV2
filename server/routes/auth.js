@@ -3,11 +3,26 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', upload.single('image'), async (req, res) => {
     try {
         const { name, firstname, password, hobbies, sex } = req.body;
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
         // Basic validation
         if (!name || !firstname || !password || !sex) {
@@ -21,11 +36,11 @@ router.post('/register', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const hobbiesJson = JSON.stringify(hobbies || []);
+        const hobbiesJson = typeof hobbies === 'string' ? hobbies : JSON.stringify(hobbies || []);
 
         const [result] = await pool.execute(
-            'INSERT INTO users (name, firstname, password, hobbies, sex) VALUES (?, ?, ?, ?, ?)',
-            [name, firstname, hashedPassword, hobbiesJson, sex]
+            'INSERT INTO users (name, firstname, password, hobbies, sex, image_url) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, firstname, hashedPassword, hobbiesJson, sex, imageUrl]
         );
 
         res.status(201).json({ message: 'Utilisateur enregistré avec succès', userId: result.insertId });

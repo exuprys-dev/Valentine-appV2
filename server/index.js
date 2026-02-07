@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const initDatabase = require('./init-db');
 
 const app = express();
@@ -12,6 +14,15 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Serve uploaded files
+app.use('/uploads', express.static(uploadsDir));
 
 app.get('/', (req, res) => {
   res.send('Valentine API is running');

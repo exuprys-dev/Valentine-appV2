@@ -9,7 +9,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
         const userId = req.userData.userId;
 
         // Get user details
-        const [users] = await pool.execute('SELECT id, name, firstname, hobbies, sex, match_id FROM users WHERE id = ?', [userId]);
+        const [users] = await pool.execute('SELECT id, name, firstname, hobbies, sex, image_url, match_id FROM users WHERE id = ?', [userId]);
         if (users.length === 0) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
         const currentUser = users[0];
@@ -20,7 +20,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
         if (currentUser.match_id) {
             // Find others with same match_id
             const [partners] = await pool.execute(
-                'SELECT id, name, firstname, hobbies, sex FROM users WHERE match_id = ? AND id != ?',
+                'SELECT id, name, firstname, hobbies, sex, image_url FROM users WHERE match_id = ? AND id != ?',
                 [currentUser.match_id, userId]
             );
 

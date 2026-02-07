@@ -15,12 +15,17 @@ export default function Auth() {
         firstname: '',
         password: '',
         hobbies: '',
-        sex: ''
+        sex: '',
+        image: null
     });
     const [error, setError] = useState('');
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (e.target.name === 'image') {
+            setFormData({ ...formData, image: e.target.files[0] });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -28,22 +33,32 @@ export default function Auth() {
         setError('');
 
         const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-        const body = isLogin
-            ? { name: formData.name, password: formData.password }
-            : {
-                name: formData.name,
-                firstname: formData.firstname,
-                password: formData.password,
-                hobbies: formData.hobbies.split(',').map(h => h.trim()).filter(Boolean),
-                sex: formData.sex
-            };
+        let body;
+        let headers = {};
+
+        if (isLogin) {
+            body = JSON.stringify({ name: formData.name, password: formData.password });
+            headers['Content-Type'] = 'application/json';
+        } else {
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('firstname', formData.firstname);
+            data.append('password', formData.password);
+            data.append('hobbies', JSON.stringify(formData.hobbies.split(',').map(h => h.trim()).filter(Boolean)));
+            data.append('sex', formData.sex);
+            if (formData.image) {
+                data.append('image', formData.image);
+            }
+            body = data;
+            // No need to set Content-Type for FormData, the browser will set it with boundary
+        }
 
         try {
             const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
             const res = await fetch(`${API_URL}${endpoint}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                headers: headers,
+                body: body
             });
 
             const data = await res.json();
@@ -113,6 +128,16 @@ export default function Auth() {
                                                 onChange={handleChange}
                                                 placeholder="Lecture, Cinéma, Codage"
                                             />
+                                            <div className="mb-3">
+                                                <label className="form-label text-secondary small fw-bold">Photo de profil</label>
+                                                <input
+                                                    type="file"
+                                                    name="image"
+                                                    onChange={handleChange}
+                                                    accept="image/*"
+                                                    className="form-control border-0 bg-light rounded-3"
+                                                />
+                                            </div>
                                             <div className="mb-3">
                                                 <label className="form-label text-secondary small fw-bold">Genre</label>
                                                 <select

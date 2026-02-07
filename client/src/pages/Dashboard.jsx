@@ -10,8 +10,8 @@ export default function Dashboard() {
     const [matchData, setMatchData] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
     useEffect(() => {
-        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
         fetch(`${API_URL}/api/user/dashboard`, {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -24,7 +24,7 @@ export default function Dashboard() {
                 console.error(err);
                 setLoading(false);
             });
-    }, [token]);
+    }, [token, API_URL]);
 
     const handleLogout = () => {
         logout();
@@ -57,15 +57,29 @@ export default function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         className="card shadow-sm border-0 mb-5 rounded-4"
                     >
-                        <div className="card-body p-4 p-md-5">
-                            <h2 className="card-title fw-bold mb-3">Bonjour, {matchData?.user.firstname} {matchData?.user.name} !</h2>
-                            <div className="d-flex flex-wrap gap-2">
-                                {matchData?.user.hobbies.map((hobby, i) => (
-                                    <span key={i} className="badge bg-secondary rounded-pill fw-normal fs-6">
-                                        {hobby}
-                                    </span>
-                                ))}
-                                <span className="badge bg-secondary rounded-pill fw-normal fs-6">{matchData?.user.sex}</span>
+                        <div className="card-body p-4 p-md-5 d-flex align-items-center gap-4">
+                            {matchData?.user.image_url ? (
+                                <img
+                                    src={`${API_URL}${matchData.user.image_url}`}
+                                    alt="Profile"
+                                    className="rounded-circle shadow-sm"
+                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '100px', height: '100px', fontSize: '3rem' }}>
+                                    👤
+                                </div>
+                            )}
+                            <div>
+                                <h2 className="card-title fw-bold mb-3">Bonjour, {matchData?.user.firstname} {matchData?.user.name} !</h2>
+                                <div className="d-flex flex-wrap gap-2">
+                                    {matchData?.user.hobbies.map((hobby, i) => (
+                                        <span key={i} className="badge bg-secondary rounded-pill fw-normal fs-6">
+                                            {hobby}
+                                        </span>
+                                    ))}
+                                    <span className="badge bg-secondary rounded-pill fw-normal fs-6">{matchData?.user.sex}</span>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -84,7 +98,16 @@ export default function Dashboard() {
                                     {matchData.matches.map(partner => (
                                         <div key={partner.id} className="col-md-auto">
                                             <div className="bg-white text-dark p-4 rounded-4 shadow h-100" style={{ minWidth: '220px' }}>
-                                                <div className="display-4 mb-3">👤</div>
+                                                {partner.image_url ? (
+                                                    <img
+                                                        src={`${API_URL}${partner.image_url}`}
+                                                        alt={partner.firstname}
+                                                        className="rounded-circle mb-3 shadow-sm"
+                                                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                                    />
+                                                ) : (
+                                                    <div className="display-4 mb-3">👤</div>
+                                                )}
                                                 <h4 className="fw-bold mb-2">{partner.firstname} {partner.name}</h4>
                                                 <div className="d-flex flex-wrap justify-center gap-1">
                                                     {partner.hobbies.map((h, i) => (

@@ -9,9 +9,16 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [matchData, setMatchData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [imgErrors, setImgErrors] = useState({});
+    const [uploading, setUploading] = useState(false);
+
+    const handleImgError = (id) => {
+        setImgErrors(prev => ({ ...prev, [id]: true }));
+    };
 
     const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
-    useEffect(() => {
+
+    const fetchDashboard = React.useCallback(() => {
         fetch(`${API_URL}/api/user/dashboard`, {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -25,6 +32,41 @@ export default function Dashboard() {
                 setLoading(false);
             });
     }, [token, API_URL]);
+
+    useEffect(() => {
+        fetchDashboard();
+    }, [fetchDashboard]);
+
+    const handleImageUpdate = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const res = await fetch(`${API_URL}/api/user/profile-image`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData
+            });
+
+            if (res.ok) {
+                // Clear errors for the user image to force reload
+                setImgErrors(prev => ({ ...prev, user: false }));
+                fetchDashboard();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Erreur lors de la mise à jour');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur réseau');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleLogout = () => {
         logout();
@@ -58,18 +100,37 @@ export default function Dashboard() {
                         className="card shadow-sm border-0 mb-5 rounded-4"
                     >
                         <div className="card-body p-4 p-md-5 d-flex align-items-center gap-4">
-                            {matchData?.user.image_url ? (
-                                <img
-                                    src={`${API_URL}${matchData.user.image_url}`}
-                                    alt="Profile"
-                                    className="rounded-circle shadow-sm"
-                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                                />
-                            ) : (
-                                <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '100px', height: '100px', fontSize: '3rem' }}>
-                                    👤
+                            <div className="position-relative group" style={{ cursor: 'pointer' }} onClick={() => document.getElementById('profile-upload').click()}>
+                                {matchData?.user.image_url && !imgErrors['user'] ? (
+                                    <img
+                                        src={matchData.user.image_url.startsWith('http') ? matchData.user.image_url : `${API_URL}${matchData.user.image_url}`}
+                                        alt="Profile"
+                                        className="rounded-circle shadow-sm"
+                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                        onError={() => handleImgError('user')}
+                                    />
+                                ) : (
+                                    <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '100px', height: '100px', fontSize: '3rem' }}>
+                                        👤
+                                    </div>
+                                )}
+                                <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-opacity-100 transition-opacity" style={{ transition: '0.3s' }}>
+                                    <span className="text-white small fw-bold">Modifier</span>
                                 </div>
-                            )}
+                                {uploading && (
+                                    <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex align-items-center justify-content-center bg-white bg-opacity-75">
+                                        <div className="spinner-border spinner-border-sm text-valentine" role="status"></div>
+                                    </div>
+                                )}
+                                <input
+                                    id="profile-upload"
+                                    type="file"
+                                    hidden
+                                    accept="image/*"
+                                    onChange={handleImageUpdate}
+                                    disabled={uploading}
+                                />
+                            </div>
                             <div>
                                 <h2 className="card-title fw-bold mb-3">Bonjour, {matchData?.user.firstname} {matchData?.user.name} !</h2>
                                 <div className="d-flex flex-wrap gap-2">
@@ -98,12 +159,13 @@ export default function Dashboard() {
                                     {matchData.matches.map(partner => (
                                         <div key={partner.id} className="col-md-auto">
                                             <div className="bg-white text-dark p-4 rounded-4 shadow h-100" style={{ minWidth: '220px' }}>
-                                                {partner.image_url ? (
+                                                {partner.image_url && !imgErrors[partner.id] ? (
                                                     <img
-                                                        src={`${API_URL}${partner.image_url}`}
+                                                        src={partner.image_url.startsWith('http') ? partner.image_url : `${API_URL}${partner.image_url}`}
                                                         alt={partner.firstname}
                                                         className="rounded-circle mb-3 shadow-sm"
                                                         style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                                        onError={() => handleImgError(partner.id)}
                                                     />
                                                 ) : (
                                                     <div className="display-4 mb-3">👤</div>

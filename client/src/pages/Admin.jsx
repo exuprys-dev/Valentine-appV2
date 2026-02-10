@@ -10,6 +10,11 @@ export default function Admin() {
     const [loading, setLoading] = useState(false);
     const [matches, setMatches] = useState([]);
     const [loadingMatches, setLoadingMatches] = useState(false);
+    const [imgErrors, setImgErrors] = useState({});
+
+    const handleImgError = (id) => {
+        setImgErrors(prev => ({ ...prev, [id]: true }));
+    };
 
     const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '');
 
@@ -114,12 +119,13 @@ export default function Admin() {
                                                 <div className="d-flex flex-column gap-3">
                                                     {match.users.map((user) => (
                                                         <div key={user.id} className="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
-                                                            {user.image_url ? (
+                                                            {user.image_url && !imgErrors[user.id] ? (
                                                                 <img
-                                                                    src={`${API_URL}${user.image_url}`}
+                                                                    src={user.image_url.startsWith('http') ? user.image_url : `${API_URL}${user.image_url}`}
                                                                     alt={user.firstname}
                                                                     className="rounded-circle shadow-sm"
                                                                     style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                                    onError={() => handleImgError(user.id)}
                                                                 />
                                                             ) : (
                                                                 <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '50px', height: '50px' }}>

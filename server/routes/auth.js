@@ -3,26 +3,18 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
-const multer = require('multer');
-const path = require('path');
-
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ storage: storage });
+const { upload, isCloudinaryConfigured } = require('../middleware/upload');
 
 // Register
 router.post('/register', upload.single('image'), async (req, res) => {
     try {
         const { name, firstname, password, hobbies, sex } = req.body;
-        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+        // imageUrl will be the path/url from multer (Cloudinary URL or local path)
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = isCloudinaryConfigured ? req.file.path : `/uploads/${req.file.filename}`;
+        }
 
         // Basic validation
         if (!name || !firstname || !password || !sex) {
@@ -53,11 +45,7 @@ router.post('/register', upload.single('image'), async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
-        const { name, password } = req.body; // Login with name? or combine name+firstname?
-        // Request says "inscrire son name firstname". Usually login is with one identifier.
-        // Let's assume login is with `name` (lastname) for now, or maybe they provide both?
-        // Let's stick to `name` as username for now, or add an `email` field?
-        // The prompt didn't specify email. Let's use `name` as the identifier.
+        const { name, password } = req.body;
 
         if (!name || !password) {
             return res.status(400).json({ error: 'Veuillez remplir tous les champs' });

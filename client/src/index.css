@@ -24,3 +24,16 @@ body {
     border: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+/* Hover effects for profile image update */
+.group:hover .hover-opacity-100 {
+    opacity: 1 !important;
+}
+
+.transition-opacity {
+    transition: opacity 0.3s ease;
+}
+
+.bg-valentine {
+    background-color: #ff3366;
+}

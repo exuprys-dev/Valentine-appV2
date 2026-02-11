@@ -8,8 +8,9 @@ router.post('/match', async (req, res) => {
     try {
         console.log('🔄 Lancement de l\'algorithme de mise en relation...');
 
-        // 1. Récupérer tous les utilisateurs de la base de données sauf l'admin
-        const [users] = await pool.execute('SELECT * FROM users WHERE is_admin != 1');
+        // 1. Récupérer tous les utilisateurs de la base de données
+        const [allUsers] = await pool.execute('SELECT * FROM users');
+        const users = allUsers.filter(u => u.is_admin != 1 && u.is_admin !== true);
 
         if (users.length < 2) {
             return res.status(400).json({ error: 'Pas assez d\'utilisateurs pour effectuer la mise en relation' });
@@ -159,7 +160,8 @@ router.post('/match', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Erreur serveur lors de la mise en relation',
-            details: error.message
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });

@@ -17,13 +17,18 @@ if (isPostgres) {
   // Wrap pg pool to match mysql2 interface
   const originalQuery = pool.query.bind(pool);
   pool.query = async (sql, params) => {
-    if (typeof sql === 'string' && params) {
-      let index = 1;
-      sql = sql.replace(/\?/g, () => `$${index++}`);
+    if (typeof sql === 'string') {
+      if (params) {
+        let index = 1;
+        sql = sql.replace(/\?/g, () => `$${index++}`);
+      }
 
       // For INSERT queries, append RETURNING id to get the insertId
       if (sql.trim().toLowerCase().startsWith('insert')) {
-        sql += ' RETURNING id';
+        // Only if it doesn't already have one
+        if (!sql.toLowerCase().includes('returning')) {
+          sql = sql.replace(/;?$/, ' RETURNING id');
+        }
       }
     }
     const result = await originalQuery(sql, params);

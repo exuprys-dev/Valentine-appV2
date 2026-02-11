@@ -57,8 +57,9 @@ router.post('/match', async (req, res) => {
             pairs.push([hommes.pop(), femmes.pop()]);
         }
 
-        // Priorité 2 : Regrouper les "Autres" entre eux ou avec les restes
-        let restes = [...hommes, ...femmes];
+        // Priorité 2 : Regrouper les "Autres" et les restes
+        let restes = unmatched.filter(u => u.sex !== 'Masculin' && u.sex !== 'Feminin');
+        restes = [...restes, ...hommes, ...femmes];
         shuffle(restes);
 
         while (restes.length >= 2) {
@@ -76,7 +77,7 @@ router.post('/match', async (req, res) => {
         // 6. Sauvegarder les paires dans la base de données
         for (const pair of pairs) {
             // Créer un nouveau match
-            const [matchResult] = await pool.execute('INSERT INTO matches () VALUES ()');
+            const [matchResult] = await pool.execute('INSERT INTO matches (created_at) VALUES (CURRENT_TIMESTAMP)');
             const matchId = matchResult.insertId;
 
             // Assigner le match_id aux deux utilisateurs de la paire
@@ -103,16 +104,36 @@ router.post('/match', async (req, res) => {
         console.log('✅ Processus de matching terminé avec succès');
 
         // 8. Récupérer et renvoyer les statistiques
-        const [matchStats] = await pool.execute(`
+        const [rawMatchStats] = await pool.execute(`
             SELECT 
                 m.id as match_id,
-                COUNT(u.id) as members_count,
-                GROUP_CONCAT(CONCAT(u.name, ' (', u.id, ')') ORDER BY u.id SEPARATOR ', ') as members
+                u.id as user_id,
+                u.name as user_name
             FROM matches m
             LEFT JOIN users u ON u.match_id = m.id
-            GROUP BY m.id
             ORDER BY m.id
         `);
+
+        // Agréger les statistiques en JavaScript pour compatibilité PostgreSQL
+        const matchStatsMap = rawMatchStats.reduce((acc, row) => {
+            if (!acc[row.match_id]) {
+                acc[row.match_id] = {
+                    match_id: row.match_id,
+                    members_count: 0,
+                    members: []
+                };
+            }
+            if (row.user_id) {
+                acc[row.match_id].members_count++;
+                acc[row.match_id].members.push(`${row.user_name} (${row.user_id})`);
+            }
+            return acc;
+        }, {});
+
+        const matchStats = Object.values(matchStatsMap).map(m => ({
+            ...m,
+            members: m.members.join(', ')
+        }));
 
         const [unmatchedUsers] = await pool.execute(`
             SELECT id, name, firstname 

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const authMiddleware = require('../middleware/auth');
+const bcrypt = require('bcrypt');
 const { calculateSimilarity, calculateSexSimilarity } = require('../utils/matcher');
 
 // Trigger matching algorithm
@@ -276,10 +277,10 @@ router.post('/users/:id/reset-password', authMiddleware, async (req, res) => {
 
         if (!newPassword) return res.status(400).json({ error: 'Le nouveau mot de passe est requis' });
 
-        const bcrypt = require('bcrypt');
+        const userId = parseInt(id);
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, id]);
+        await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
 
         res.json({ success: true, message: 'Mot de passe réinitialisé avec succès' });
     } catch (error) {

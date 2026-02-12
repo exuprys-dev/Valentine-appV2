@@ -112,11 +112,11 @@ export default function Admin() {
                 <div className="container">
                     <span className="navbar-brand fw-bold text-valentine">Administration</span>
                     <ul className="navbar-nav ms-auto gap-3">
-                        <li className="nav-item">
+                        {/* <li className="nav-item">
                             <Button variant="ghost" className="text-white border-white" size="sm" onClick={() => navigate('/admin/users')}>
                                 👥 Gestion Utilisateurs
                             </Button>
-                        </li>
+                        </li> */}
                         <li className="nav-item">
                             <Button variant="ghost" className="text-white border-white" size="sm" onClick={() => navigate('/dashboard')}>&larr; Tableau de bord</Button>
                         </li>

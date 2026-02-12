@@ -37,11 +37,13 @@ if (isPostgres) {
     const rows = result.rows;
     const fields = result.fields;
 
-    // If it was an INSERT, the first row will contain the ID
-    const mockResult = rows;
+    // For INSERT, mock insertId
     if (result.command === 'INSERT' && rows.length > 0) {
       mockResult.insertId = rows[0].id;
     }
+
+    // For UPDATE/DELETE, mock affectedRows (rowCount)
+    mockResult.affectedRows = result.rowCount;
 
     return [mockResult, fields];
   };

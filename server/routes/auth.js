@@ -8,7 +8,9 @@ const { upload, isCloudinaryConfigured } = require('../middleware/upload');
 // Register
 router.post('/register', upload.single('image'), async (req, res) => {
     try {
-        const { name, firstname, password, hobbies, sex } = req.body;
+        let { name, firstname, password, hobbies, sex } = req.body;
+        name = name?.trim();
+        firstname = firstname?.trim();
 
         // imageUrl will be the path/url from multer (Cloudinary URL or local path)
         let imageUrl = null;
@@ -45,13 +47,15 @@ router.post('/register', upload.single('image'), async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
-        const { name, password } = req.body;
+        let { name, password } = req.body;
+        name = name?.trim();
+        password = password?.trim();
 
         if (!name || !password) {
             return res.status(400).json({ error: 'Veuillez remplir tous les champs' });
         }
 
-        const [rows] = await pool.execute('SELECT * FROM users WHERE name = ?', [name]);
+        const [rows] = await pool.execute('SELECT * FROM users WHERE LOWER(name) = LOWER(?)', [name]);
 
         if (rows.length === 0) {
             return res.status(401).json({ error: 'Identifiants invalides' });

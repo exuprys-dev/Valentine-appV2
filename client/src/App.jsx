@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import VotingPage from './pages/VotingPage';
 import Maintenance from './pages/Maintenance';
+import UserManagement from './pages/UserManagement';
 
 const ProtectedRoute = ({ children, requireAdmin }) => {
   const { user, loading, token } = useAuth();
@@ -41,6 +42,14 @@ function RouterWrapped() {
             element={
               <ProtectedRoute requireAdmin>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requireAdmin>
+                <UserManagement />
               </ProtectedRoute>
             }
           />

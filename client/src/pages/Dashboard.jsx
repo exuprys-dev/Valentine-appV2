@@ -86,6 +86,9 @@ export default function Dashboard() {
                         ) : isAdmin && (
                             <Button variant="ghost" className="text-valentine fw-bold" onClick={() => navigate('/vote')}>🏆 Voir les Résultats</Button>
                         )}
+                        {isAdmin && (
+                            <Button variant="ghost" onClick={() => navigate('/admin/users')}>👥 Gestion Utilisateurs</Button>
+                        )}
                         <Button variant="ghost" onClick={() => navigate('/admin')}>Administration</Button>
                         <Button variant="ghost" onClick={handleLogout}>Se déconnecter</Button>
                     </div>

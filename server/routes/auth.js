@@ -60,13 +60,19 @@ router.post('/login', async (req, res) => {
             [name]
         );
 
+        console.log(`🔍 Login attempt for name: "${name}"`);
+        console.log(`📊 Found ${rows.length} user(s) with this name`);
+
         if (rows.length === 0) {
+            console.log('❌ No users found');
             return res.status(401).json({ error: 'Identifiants invalides' });
         }
 
         let user = null;
         for (const u of rows) {
+            console.log(`🔐 Testing password for user ID ${u.id} (${u.firstname})`);
             const isValid = await bcrypt.compare(password, u.password);
+            console.log(`   Result: ${isValid ? '✅ MATCH' : '❌ NO MATCH'}`);
             if (isValid) {
                 user = u;
                 break;
@@ -74,8 +80,11 @@ router.post('/login', async (req, res) => {
         }
 
         if (!user) {
+            console.log('❌ No matching password found among all users');
             return res.status(401).json({ error: 'Identifiants invalides' });
         }
+
+        console.log(`✅ Login successful for user ID ${user.id}`);
 
         const token = jwt.sign(
             { userId: user.id, isAdmin: !!user.is_admin },

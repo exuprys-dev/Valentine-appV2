@@ -35,7 +35,7 @@ export default function Maintenance() {
 
                             {/* WhatsApp Button */}
                             <a
-                                href="https://wa.me/22540532331"
+                                href="https://wa.me/22940532331"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-success btn-lg mb-3 w-100"

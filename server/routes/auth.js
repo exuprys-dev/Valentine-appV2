@@ -47,15 +47,19 @@ router.post('/register', upload.single('image'), async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
-        let { name, password } = req.body;
+        let { name, firstname, password } = req.body;
         name = name?.trim();
+        firstname = firstname?.trim();
         password = password?.trim();
 
-        if (!name || !password) {
+        if (!name || !firstname || !password) {
             return res.status(400).json({ error: 'Veuillez remplir tous les champs' });
         }
 
-        const [rows] = await pool.execute('SELECT * FROM users WHERE LOWER(name) = LOWER(?)', [name]);
+        const [rows] = await pool.execute(
+            'SELECT * FROM users WHERE LOWER(name) = LOWER(?) AND LOWER(firstname) = LOWER(?)',
+            [name, firstname]
+        );
 
         if (rows.length === 0) {
             return res.status(401).json({ error: 'Identifiants invalides' });

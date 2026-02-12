@@ -46,7 +46,13 @@ if (isPostgres) {
     // For UPDATE/DELETE, mock affectedRows (rowCount)
     mockResult.affectedRows = result.rowCount;
 
-    return [mockResult, fields];
+    // If it was an SELECT, return standard [rows, fields]
+    if (result.command === 'SELECT') {
+      return [mockResult, fields];
+    }
+
+    // For other commands (INSERT, UPDATE, DELETE), return [mockResult] to be closer to mysql2's non-select result
+    return [mockResult];
   };
 
   // Also add execute() method (alias to query for PostgreSQL)

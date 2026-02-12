@@ -34,8 +34,7 @@ if (isPostgres) {
     const result = await originalQuery(sql, params);
 
     // Mock the result structure for mysql2
-    const rows = result.rows;
-    const fields = result.fields;
+    const mockResult = rows;
 
     // For INSERT, mock insertId
     if (result.command === 'INSERT' && rows.length > 0) {

@@ -278,9 +278,14 @@ router.post('/users/:id/reset-password', authMiddleware, async (req, res) => {
         if (!newPassword) return res.status(400).json({ error: 'Le nouveau mot de passe est requis' });
 
         const userId = parseInt(id);
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const trimmedPassword = newPassword.trim();
+        const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
 
-        await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
+        const [result] = await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Utilisateur non trouvé' });
+        }
 
         res.json({ success: true, message: 'Mot de passe réinitialisé avec succès' });
     } catch (error) {

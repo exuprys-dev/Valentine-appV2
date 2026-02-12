@@ -136,7 +136,7 @@ export default function Admin() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ newPassword })
+                body: JSON.stringify({ newPassword: newPassword.trim() })
             });
 
             if (res.ok) {

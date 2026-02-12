@@ -64,10 +64,16 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Identifiants invalides' });
         }
 
-        const user = rows[0];
-        const validPassword = await bcrypt.compare(password, user.password);
+        let user = null;
+        for (const u of rows) {
+            const isValid = await bcrypt.compare(password, u.password);
+            if (isValid) {
+                user = u;
+                break;
+            }
+        }
 
-        if (!validPassword) {
+        if (!user) {
             return res.status(401).json({ error: 'Identifiants invalides' });
         }
 

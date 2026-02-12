@@ -179,7 +179,7 @@ export default function Dashboard() {
                                                 <h4 className="fw-bold mb-2">{partner.firstname} {partner.name}</h4>
                                                 <div className="d-flex flex-wrap justify-center gap-1">
                                                     {partner.hobbies.map((h, i) => (
-                                                        <span key={i} className="badge bg-light text-dark border">{h}</span>
+                                                        <span key={i} className="badge bg-secondary rounded-pill fw-normal fs-6">{h}</span>
                                                     ))}
                                                     <span className="badge bg-secondary rounded-pill fw-normal fs-6">{partner.sex}</span>
                                                 </div>

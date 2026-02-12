@@ -41,7 +41,7 @@ export default function Maintenance() {
                                 className="btn btn-success btn-lg mb-3 w-100"
                             >
                                 <span className="me-2">💬</span>
-                                Contacter sur WhatsApp
+                                Contactez sur WhatsApp
                             </a>
 
                             {/* Back to Login */}

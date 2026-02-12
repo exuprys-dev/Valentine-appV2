@@ -52,6 +52,7 @@ function RouterWrapped() {
               </ProtectedRoute>
             }
           />
+          <Route path="/maintenance" element={<Maintenance />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

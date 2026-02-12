@@ -240,25 +240,14 @@ router.post('/settings/voting', authMiddleware, async (req, res) => {
         const value = enabled ? 'true' : 'false';
 
         await pool.execute(
-            "INSERT INTO settings (key_name, value_text) VALUES ('voting_enabled', ?) ON DUPLICATE KEY UPDATE value_text = ?",
-            [value, value]
+            "INSERT INTO settings (key_name, value_text) VALUES ('voting_enabled', ?) ON CONFLICT (key_name) DO UPDATE SET value_text = EXCLUDED.value_text",
+            [value]
         );
 
         res.json({ success: true, message: `Système de vote ${enabled ? 'activé' : 'désactivé'}` });
     } catch (error) {
         console.error('❌ Erreur lors de la modification du statut de vote:', error);
-        // Try fallback for PostgreSQL if needed (using ON CONFLICT)
-        try {
-            const { enabled } = req.body;
-            const value = enabled ? 'true' : 'false';
-            await pool.execute(
-                "INSERT INTO settings (key_name, value_text) VALUES ('voting_enabled', ?) ON CONFLICT (key_name) DO UPDATE SET value_text = EXCLUDED.value_text",
-                [value]
-            );
-            return res.json({ success: true, message: `Système de vote ${enabled ? 'activé' : 'désactivé'}` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erreur serveur lors de la mise à jour des paramètres' });
-        }
+        res.status(500).json({ error: 'Erreur serveur lors de la mise à jour des paramètres' });
     }
 });
 

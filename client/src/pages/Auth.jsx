@@ -39,7 +39,6 @@ export default function Auth() {
         if (isLogin) {
             body = JSON.stringify({
                 name: formData.name,
-                firstname: formData.firstname,
                 password: formData.password
             });
             headers['Content-Type'] = 'application/json';
@@ -109,15 +108,6 @@ export default function Auth() {
                                     required
                                 />
 
-                                <Input
-                                    label="Prénom"
-                                    name="firstname"
-                                    value={formData.firstname}
-                                    onChange={handleChange}
-                                    placeholder="John"
-                                    required
-                                />
-
                                 <AnimatePresence>
                                     {!isLogin && (
                                         <motion.div
@@ -126,6 +116,14 @@ export default function Auth() {
                                             exit={{ height: 0, opacity: 0 }}
                                             className="overflow-hidden"
                                         >
+                                            <Input
+                                                label="Prénom"
+                                                name="firstname"
+                                                value={formData.firstname}
+                                                onChange={handleChange}
+                                                placeholder="John"
+                                                required={!isLogin}
+                                            />
                                             <Input
                                                 label="Loisirs (séparés par des virgules)"
                                                 name="hobbies"

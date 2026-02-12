@@ -1,30 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AuthContext } from './AuthContextObject';
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const loadUser = () => {
-            if (token) {
-                // Decode token or fetch user profile if needed
-                // For simplicity, we assume we might store user in localStorage or just check if token exists
-                // Real app would verify token with backend
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    try {
-                        setUser(JSON.parse(storedUser));
-                    } catch (e) {
-                        console.error('Failed to parse user from localStorage:', e);
-                    }
-                }
+    const [token, setToken] = useState(() => localStorage.getItem('token'));
+    const [user, setUser] = useState(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                return JSON.parse(storedUser);
+            } catch (e) {
+                console.error('Failed to parse user from localStorage:', e);
+                return null;
             }
-            setLoading(false);
-        };
-        loadUser();
-    }, [token]);
+        }
+        return null;
+    });
+    const [loading, setLoading] = useState(false); // No longer loading asynchronously
+
+    // If you ever need to verify the token with the backend on boot, 
+    // you could do it here, but keep loading=false initially if we have cached data
+    // to avoid the redirect.
 
     const login = (userData, newToken) => {
         setUser(userData);

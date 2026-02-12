@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const authMiddleware = require('../middleware/auth');
 const { calculateSimilarity, calculateSexSimilarity } = require('../utils/matcher');
 
 // Trigger matching algorithm
-router.post('/match', async (req, res) => {
+router.post('/match', authMiddleware, async (req, res) => {
     try {
+        if (!req.userData.isAdmin) return res.status(403).json({ error: 'Accès refusé' });
         console.log('🔄 Lancement de l\'algorithme de mise en relation...');
 
         // 1. Récupérer tous les utilisateurs de la base de données
@@ -30,6 +32,8 @@ router.post('/match', async (req, res) => {
 
         // 3. Réinitialiser les anciens matches (optionnel)
         await pool.execute('UPDATE users SET match_id = NULL');
+        // Clear votes first to avoid foreign key constraint failure
+        await pool.execute('DELETE FROM votes');
         await pool.execute('DELETE FROM matches');
 
         // 4. Initialiser les variables
@@ -167,8 +171,9 @@ router.post('/match', async (req, res) => {
 });
 
 // Get all matches and their users
-router.get('/matches', async (req, res) => {
+router.get('/matches', authMiddleware, async (req, res) => {
     try {
+        if (!req.userData.isAdmin) return res.status(403).json({ error: 'Accès refusé' });
         const [matches] = await pool.execute(`
             SELECT 
                 m.id as match_id,
@@ -207,6 +212,89 @@ router.get('/matches', async (req, res) => {
         res.json(Object.values(groupedMatches));
     } catch (error) {
         console.error('❌ Erreur lors de la récupération des matchs:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+// Get current settings
+router.get('/settings', authMiddleware, async (req, res) => {
+    try {
+        if (!req.userData.isAdmin) return res.status(403).json({ error: 'Accès refusé' });
+        const [settings] = await pool.execute('SELECT key_name, value_text FROM settings');
+        const settingsMap = settings.reduce((acc, s) => {
+            acc[s.key_name] = s.value_text;
+            return acc;
+        }, {});
+        res.json(settingsMap);
+    } catch (error) {
+        console.error('❌ Erreur lors de la récupération des paramètres:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+// Toggle voting
+router.post('/settings/voting', authMiddleware, async (req, res) => {
+    try {
+        if (!req.userData.isAdmin) return res.status(403).json({ error: 'Accès refusé' });
+        const { enabled } = req.body;
+        const value = enabled ? 'true' : 'false';
+
+        await pool.execute(
+            "INSERT INTO settings (key_name, value_text) VALUES ('voting_enabled', ?) ON DUPLICATE KEY UPDATE value_text = ?",
+            [value, value]
+        );
+
+        res.json({ success: true, message: `Système de vote ${enabled ? 'activé' : 'désactivé'}` });
+    } catch (error) {
+        console.error('❌ Erreur lors de la modification du statut de vote:', error);
+        // Try fallback for PostgreSQL if needed (using ON CONFLICT)
+        try {
+            const { enabled } = req.body;
+            const value = enabled ? 'true' : 'false';
+            await pool.execute(
+                "INSERT INTO settings (key_name, value_text) VALUES ('voting_enabled', ?) ON CONFLICT (key_name) DO UPDATE SET value_text = EXCLUDED.value_text",
+                [value]
+            );
+            return res.json({ success: true, message: `Système de vote ${enabled ? 'activé' : 'désactivé'}` });
+        } catch (e) {
+            res.status(500).json({ error: 'Erreur serveur lors de la mise à jour des paramètres' });
+        }
+    }
+});
+
+// Get all users for management
+router.get('/users', authMiddleware, async (req, res) => {
+    try {
+        if (!req.userData.isAdmin) return res.status(403).json({ error: 'Accès refusé' });
+
+        const [users] = await pool.execute(
+            'SELECT id, name, firstname, sex, is_admin, created_at FROM users ORDER BY created_at DESC'
+        );
+        res.json(users);
+    } catch (error) {
+        console.error('❌ Erreur lors de la récupération des utilisateurs:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+// Reset user password
+router.post('/users/:id/reset-password', authMiddleware, async (req, res) => {
+    try {
+        if (!req.userData.isAdmin) return res.status(403).json({ error: 'Accès refusé' });
+
+        const { id } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword) return res.status(400).json({ error: 'Le nouveau mot de passe est requis' });
+
+        const bcrypt = require('bcrypt');
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, id]);
+
+        res.json({ success: true, message: 'Mot de passe réinitialisé avec succès' });
+    } catch (error) {
+        console.error('❌ Erreur lors de la réinitialisation du mot de passe:', error);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });

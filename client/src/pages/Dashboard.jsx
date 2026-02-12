@@ -5,8 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
-    const { token, logout } = useAuth();
+    const { token, logout, user } = useAuth();
     const navigate = useNavigate();
+    const isAdmin = user?.isAdmin === true || user?.isAdmin === 1 || user?.isAdmin === 'true';
     const [matchData, setMatchData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imgErrors, setImgErrors] = useState({});
@@ -80,6 +81,11 @@ export default function Dashboard() {
                 <div className="container">
                     <span className="navbar-brand text-valentine fw-bold">Valentine App</span>
                     <div className="d-flex gap-2">
+                        {matchData?.settings?.voting_enabled ? (
+                            <Button variant="ghost" onClick={() => navigate('/vote')}>Voter pour le meilleur couple 💖</Button>
+                        ) : isAdmin && (
+                            <Button variant="ghost" className="text-valentine fw-bold" onClick={() => navigate('/vote')}>🏆 Voir les Résultats</Button>
+                        )}
                         <Button variant="ghost" onClick={() => navigate('/admin')}>Administration</Button>
                         <Button variant="ghost" onClick={handleLogout}>Se déconnecter</Button>
                     </div>
@@ -101,7 +107,7 @@ export default function Dashboard() {
                     >
                         <div className="card-body p-4 p-md-5 d-flex align-items-center gap-4">
                             <div className="position-relative group" style={{ cursor: 'pointer' }} onClick={() => document.getElementById('profile-upload').click()}>
-                                {matchData?.user.image_url && !imgErrors['user'] ? (
+                                {(matchData?.user.image_url && matchData.user.image_url !== 'null' && matchData.user.image_url !== 'undefined' && !imgErrors['user']) ? (
                                     <img
                                         src={matchData.user.image_url.startsWith('http') ? matchData.user.image_url : `${API_URL}${matchData.user.image_url}`}
                                         alt="Profile"
@@ -159,7 +165,7 @@ export default function Dashboard() {
                                     {matchData.matches.map(partner => (
                                         <div key={partner.id} className="col-md-auto">
                                             <div className="bg-white text-dark p-4 rounded-4 shadow h-100" style={{ minWidth: '220px' }}>
-                                                {partner.image_url && !imgErrors[partner.id] ? (
+                                                {(partner.image_url && partner.image_url !== 'null' && partner.image_url !== 'undefined' && !imgErrors[partner.id]) ? (
                                                     <img
                                                         src={partner.image_url.startsWith('http') ? partner.image_url : `${API_URL}${partner.image_url}`}
                                                         alt={partner.firstname}

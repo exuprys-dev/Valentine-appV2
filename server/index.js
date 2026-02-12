@@ -37,6 +37,9 @@ app.use('/api/admin', adminRoutes);
 const userRoutes = require('./routes/user');
 app.use('/api/user', userRoutes);
 
+const voteRoutes = require('./routes/votes');
+app.use('/api/votes', voteRoutes);
+
 // Initialize database and start server
 initDatabase()
   .then(() => {

@@ -5,6 +5,7 @@ import { useAuth } from './hooks/useAuth';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
+import VotingPage from './pages/VotingPage';
 
 const ProtectedRoute = ({ children, requireAdmin }) => {
   const { user, loading, token } = useAuth();
@@ -39,6 +40,14 @@ function RouterWrapped() {
             element={
               <ProtectedRoute requireAdmin>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vote"
+            element={
+              <ProtectedRoute>
+                <VotingPage />
               </ProtectedRoute>
             }
           />

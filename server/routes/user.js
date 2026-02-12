@@ -32,7 +32,15 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             matchData = partners;
         }
 
-        res.json({ user: currentUser, matches: matchData });
+        // Get voting status
+        const [settings] = await pool.execute("SELECT value_text FROM settings WHERE key_name = 'voting_enabled'");
+        const votingEnabled = settings.length > 0 && settings[0].value_text === 'true';
+
+        res.json({
+            user: currentUser,
+            matches: matchData,
+            settings: { voting_enabled: votingEnabled }
+        });
 
     } catch (error) {
         console.error(error);

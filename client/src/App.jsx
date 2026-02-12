@@ -6,6 +6,7 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import VotingPage from './pages/VotingPage';
+import Maintenance from './pages/Maintenance';
 
 const ProtectedRoute = ({ children, requireAdmin }) => {
   const { user, loading, token } = useAuth();

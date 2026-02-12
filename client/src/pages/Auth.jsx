@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 export default function Auth() {
     const [isLogin, setIsLogin] = useState(true);
@@ -19,6 +20,13 @@ export default function Auth() {
         image: null
     });
     const [error, setError] = useState('');
+
+    // Redirect to maintenance if trying to register
+    useEffect(() => {
+        if (!isLogin) {
+            navigate('/maintenance');
+        }
+    }, [isLogin, navigate]);
 
     const handleChange = (e) => {
         if (e.target.name === 'image') {

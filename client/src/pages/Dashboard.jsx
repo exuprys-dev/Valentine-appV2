@@ -112,11 +112,11 @@ export default function Dashboard() {
                                         src={matchData.user.image_url.startsWith('http') ? matchData.user.image_url : `${API_URL}${matchData.user.image_url}`}
                                         alt="Profile"
                                         className="rounded-circle shadow-sm"
-                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                        style={{ width: '140px', height: '140px', objectFit: 'cover' }}
                                         onError={() => handleImgError('user')}
                                     />
                                 ) : (
-                                    <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '100px', height: '100px', fontSize: '3rem' }}>
+                                    <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '140px', height: '140px', fontSize: '4rem' }}>
                                         👤
                                     </div>
                                 )}

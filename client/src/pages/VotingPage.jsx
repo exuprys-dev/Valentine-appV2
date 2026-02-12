@@ -167,11 +167,11 @@ export default function VotingPage() {
                                                                             src={user.image_url.startsWith('http') ? user.image_url : `${API_URL}${user.image_url}`}
                                                                             alt={user.firstname}
                                                                             className="rounded-circle shadow-sm"
-                                                                            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                                                            style={{ width: '140px', height: '140px', objectFit: 'cover' }}
                                                                             onError={() => handleImgError(user.id)}
                                                                         />
                                                                     ) : (
-                                                                        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '80px', height: '80px', fontSize: '2rem' }}>
+                                                                        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '140px', height: '140px', fontSize: '4rem' }}>
                                                                             👤
                                                                         </div>
                                                                     )}

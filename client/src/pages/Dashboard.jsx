@@ -170,11 +170,11 @@ export default function Dashboard() {
                                                         src={partner.image_url.startsWith('http') ? partner.image_url : `${API_URL}${partner.image_url}`}
                                                         alt={partner.firstname}
                                                         className="rounded-circle mb-3 shadow-sm"
-                                                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                                        style={{ width: '120px', height: '120px', objectFit: 'cover' }}
                                                         onError={() => handleImgError(partner.id)}
                                                     />
                                                 ) : (
-                                                    <div className="display-4 mb-3">👤</div>
+                                                    <div className="display-1 mb-3">👤</div>
                                                 )}
                                                 <h4 className="fw-bold mb-2">{partner.firstname} {partner.name}</h4>
                                                 <div className="d-flex flex-wrap justify-center gap-1">

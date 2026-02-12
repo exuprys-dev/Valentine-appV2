@@ -231,7 +231,7 @@ export default function Admin() {
                             ) : matches.length > 0 ? (
                                 <div className="row g-4">
                                     {matches.map((match) => (
-                                        <div key={match.id} className="col-md-6 col-lg-4">
+                                        <div key={match.id} className="col-md-6 col-lg-6">
                                             <motion.div whileHover={{ scale: 1.02 }} className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
                                                 <div className="card-header bg-valentine text-white text-center py-2 border-0">
                                                     <span className="fw-bold fs-6">Couple Formé 💖</span>
@@ -247,17 +247,17 @@ export default function Admin() {
                                                                                 src={user.image_url.startsWith('http') ? user.image_url : `${API_URL}${user.image_url}`}
                                                                                 alt={user.firstname}
                                                                                 className="rounded-circle shadow-sm border border-2 border-white"
-                                                                                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                                                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                                                                                 onError={() => handleImgError(user.id)}
                                                                             />
                                                                         ) : (
-                                                                            <div className="bg-light rounded-circle shadow-sm border border-2 border-white d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', fontSize: '1.5rem' }}>
+                                                                            <div className="bg-light rounded-circle shadow-sm border border-2 border-white d-flex align-items-center justify-content-center" style={{ width: '100px', height: '100px', fontSize: '2.5rem' }}>
                                                                                 👤
                                                                             </div>
                                                                         )}
                                                                         <span className={`position-absolute bottom-0 end-0 p-1 border border-light rounded-circle bg-${user.sex === 'Masculin' ? 'primary' : 'danger'}`} style={{ width: '12px', height: '12px' }}></span>
                                                                     </div>
-                                                                    <div className="small fw-bold text-dark text-truncate" title={`${user.firstname} ${user.name}`}>{user.firstname} {user.name}</div>
+                                                                    <div className="fw-bold text-dark text-truncate fs-5" title={`${user.firstname} ${user.name}`}>{user.firstname} {user.name}</div>
                                                                 </div>
                                                                 {i === 0 && <div className="text-valentine fs-4 animate-pulse">❤️</div>}
                                                             </React.Fragment>
